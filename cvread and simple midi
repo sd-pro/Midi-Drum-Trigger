@@ -1,5 +1,3 @@
-
-
 int pad1=A3;
 int midiVal; 
 int readVal=0;

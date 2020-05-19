@@ -1,12 +1,17 @@
 int pad1=A3;
 int midiVal; 
 int readVal=0;
-byte noteOn = 144; 
-byte noteOff = 128;
+
+byte noteOn=144; 
+byte noteOff=128;
+
 int del=(100);
 int del2=(100);
-int thresHold=(128);
 
+int AR=(1024);
+int MR=(128);
+int CO=(120);
+float CG=(MR-1)/((AR-1)-CO);
 
 void MIDImessage(byte command, byte data1, byte data2)
 
@@ -28,9 +33,9 @@ void loop()
   {
 
 readVal= analogRead (pad1);
-midiVal= int ((readVal-thresHold)/7);
+midiVal= int ((readVal-CO)*CG);
 
-  if (readVal>thresHold) {
+  if (midiVal>0) {
 
 MIDImessage (noteOn, 38, midiVal);   // turn note on
    delay(del);

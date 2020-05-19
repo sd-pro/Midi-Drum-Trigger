@@ -1,0 +1,53 @@
+
+
+int pad1=A3;
+int midiVal; 
+int readVal=0;
+
+byte noteOn = 144; 
+byte noteOff = 128;
+
+int del=(20);
+int del2=(60);
+
+float midiCal= (127./1023.);
+
+void setup()
+
+{
+    Serial.begin(9600);
+    pinMode(pad1, INPUT);
+  }
+
+void loop()
+
+{
+
+readVal= analogRead (pad1);
+
+  
+midiVal= int (midiCal*readVal);
+
+  if (midiVal>30) {
+    
+ 
+  MIDImessage (noteOn, 38, 100);   // turn note on
+    delay(del);
+    
+   MIDImessage (noteOff, 38, 63);     // turn note off
+    delay(del2);  
+    
+   Serial.println (midiVal);   
+   delay(del2);  
+    }
+    
+}
+
+void MIDImessage(byte command, byte data1, byte data2)
+
+{
+    Serial.write(command);
+    Serial.write(data1);
+    Serial.write(midiVal);
+    
+}

@@ -20,7 +20,7 @@ int baudRate= (115200);
 
 // Variables for IN and OUT
 int midiVal; 
-int readVal= 0;
+int readVal;
 
 // Midi Note On / Off
 byte noteOn= 144; 
@@ -37,8 +37,6 @@ float AR= (1024.);  // Analog Digital Amplitude Resolution
 float MR= (128.);   // Midi Amplitude Resolution
 int CO= (120);      // Calibration Offset: Low Cut on Anlog Sample Amplitude
 float CG= ( (MR-1) / ( (AR-1 ) - CO ));     // Calibration Gradient
-
-
 
 void MIDImessage(byte command, byte data1, byte data2)
 
@@ -62,7 +60,8 @@ void loop()
 readVal= analogRead (pad1);
 midiVal= int ((readVal-CO)*CG);
 
-  if (midiVal>0) {
+  if (midiVal>0) 
+  {
 
 MIDImessage (noteOn, midiKey, midiVal);   // turn note on
    delay(del);

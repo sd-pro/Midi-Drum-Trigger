@@ -1,17 +1,44 @@
+/* CD to Piezeo to Midi
+ *
+ * by: sd-pro
+ *
+ * Stephan Streichhahn
+ *
+ * 2020
+ *
+ */
+
+////////////////
+// INIT
+////////////////
+
+// Arduino PADs
 int pad1= A3;
+
+// Arduino baudRate
+int baudRate= (115200);
+
+// Variables for IN and OUT
 int midiVal; 
 int readVal= 0;
 
+// Midi Note On / Off
 byte noteOn= 144; 
 byte noteOff= 128;
 
+byte midiKey= 38;
+
+// Dead Times for AD sampling
 int del= (50);
 int del2= (50);
 
-int AR= (1024);
-int MR= (128);
-int CO= (120);
-float CG= ((MR-1)/((AR-1)-CO));
+// Calibration AD to MIDI, with Low Cut
+float AR= (1024.);  // Analog Digital Amplitude Resolution
+float MR= (128.);   // Midi Amplitude Resolution
+int CO= (120);      // Calibration Offset: Low Cut on Anlog Sample Amplitude
+float CG= ( (MR-1) / ( (AR-1 ) - CO ));     // Calibration Gradient
+
+
 
 void MIDImessage(byte command, byte data1, byte data2)
 
@@ -37,10 +64,10 @@ midiVal= int ((readVal-CO)*CG);
 
   if (midiVal>0) {
 
-MIDImessage (noteOn, 38, midiVal);   // turn note on
+MIDImessage (noteOn, midiKey, midiVal);   // turn note on
    delay(del);
    
-MIDImessage (noteOff, 38, 0);     // turn note off
+MIDImessage (noteOff, midiKey, 0);     // turn note off
    delay(del2);  
    
    }

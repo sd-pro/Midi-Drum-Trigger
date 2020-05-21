@@ -16,58 +16,87 @@
 int pad1= A3;
 
 // Arduino baudRate
-int baudRate= (115200);
+int baudRate= 115200;
+
+// Midi Note On / Off
+byte midiChannel = 0 ; // 0-15 for 1 to 16
+
+byte noteOn = 144 + midiChannel; 
+byte noteOff = 128 + midiChannel;
+
+byte midiKey = 38;
+
+// Dead Times for AD sampling
+int del1= 50;
+int del2= 50;
+
+// Calibration AD to MIDI, with Low Cut
+float AR= 1024.;  // Analog Digital Amplitude Resolution
+float MR= 128.;   // Midi Amplitude Resolution
+
+int CO= 120;      // Calibration Offset: Low Cut on Anlog Sample Amplitude
+
+float CG= ( (MR-1) / ( (AR-1 ) - CO ));     // Calibration Gradient
 
 // Variables for IN and OUT
 int midiVal; 
-int readVal;
 
-// Midi Note On / Off
-byte noteOn= 144; 
-byte noteOff= 128;
+////////////////
+// FUNCTIONS
+////////////////
 
-byte midiKey= 38;
+// Read from Analog pad
+int readAnalog( int pad )
+{
+    int ar;
+    int mv;
+    // get Analog reading, calibrate to Midi Value
+    ar= analogRead( pad1 );
+    mv= int(( ar - CO ) * CG );
+    return mv ;
+}
 
-// Dead Times for AD sampling
-int del= (50);
-int del2= (50);
-
-// Calibration AD to MIDI, with Low Cut
-float AR= (1024.);  // Analog Digital Amplitude Resolution
-float MR= (128.);   // Midi Amplitude Resolution
-int CO= (120);      // Calibration Offset: Low Cut on Anlog Sample Amplitude
-float CG= ( (MR-1) / ( (AR-1 ) - CO ));     // Calibration Gradient
-
+// Write a MIDI Message
 void MIDImessage(byte command, byte data1, byte data2)
 
   {
-    Serial.write(command);
-    Serial.write(data1);
-    Serial.write(data2);
+        Serial.write( command );
+        Serial.write( data1 );
+        Serial.write( data2 );
   }
 
+ // send Midi Note On and then Off, with velocity
+void midiOnOff( byte velocity, int d1, int d2 ) 
+{
+    MIDImessage( noteOn, midiKey, midiVal );   // turn note on
+    delay( d1 );
+
+    MIDImessage( noteOff, midiKey, 0 );     // turn note off
+    delay( d2 );  
+}
+
+////////////////
+// ARDUINO Stetup and Loop
+////////////////
+
+// Arduino SETUP
 void setup()
 
-  {
+{
     Serial.begin(115200);
     pinMode(pad1, INPUT);
-  }
+}
 
+// Arduino MAIN LOOP
 void loop()
-
   {
+   // Get Anlog reading converted to Midi velocity
+   midiVal = readAnalog( pad1 );
 
-readVal= analogRead (pad1);
-midiVal= int ((readVal-CO)*CG);
-
+   // disregard negative Values (due to Low Cut Filter CO = 120)
   if (midiVal>0) 
   {
-
-MIDImessage (noteOn, midiKey, midiVal);   // turn note on
-   delay(del);
-   
-MIDImessage (noteOff, midiKey, 0);     // turn note off
-   delay(del2);  
+     midiOnOff( midiVal, del1, del2 ); 
    
    }
-   }
+ }
